@@ -27,6 +27,77 @@ public class AutomatonGenerator {
         createRToId(r);
     }
 
+    public Regex getEpislonReducedRegex(Regex r){
+        if(r instanceof Regex.Empty || r instanceof Regex.Letter || r instanceof Regex.Opt){
+            return r;
+        }
+        else if(r instanceof Regex.Cat cat){
+
+            // in the case, the whole expression is empty, we still get an epsilon
+            Regex leftWithout = getEpislonReducedRegex(cat.left);
+            Regex rightWithout = getEpislonReducedRegex(cat.right);
+
+            if(leftWithout instanceof Regex.Empty){
+                return rightWithout;
+            }
+            else if(rightWithout instanceof Regex.Empty){
+                return leftWithout;
+            }
+            return new Regex.Cat(leftWithout, rightWithout);
+        }
+        else if(r instanceof Regex.Or or){
+            Regex leftWithout = getEpislonReducedRegex(or.left);
+            Regex rightWithout = getEpislonReducedRegex(or.right);
+
+            if(leftWithout instanceof Regex.Empty && !(rightWithout instanceof Regex.Empty)){
+
+                // don't allow ??
+                if(rightWithout instanceof Regex.Opt){
+                    return rightWithout;
+                }
+                return new Regex.Opt(rightWithout);
+            }
+            else if(rightWithout instanceof Regex.Empty && !(leftWithout instanceof Regex.Empty)){
+
+                if(leftWithout instanceof Regex.Opt){
+                    return leftWithout;
+                }
+                return new Regex.Opt(leftWithout);
+            }
+            else if(rightWithout instanceof Regex.Empty && leftWithout instanceof Regex.Empty){
+                return new Regex.Empty();
+            }
+            // both non-empty
+            return new Regex.Or(leftWithout, rightWithout);
+        }
+        else if(r instanceof Regex.Star star){
+
+            Regex reducedChild = getEpislonReducedRegex(star.r);
+
+
+            // (eps)* = eps
+            if(reducedChild instanceof Regex.Empty){
+                return new Regex.Empty();
+            }
+
+            return new Regex.Star(reducedChild);
+        }
+        else if(r instanceof Regex.Grouping grouping){
+
+            Regex reducedChild = getEpislonReducedRegex(grouping.r);
+
+            // (eps) = eps
+            if(reducedChild instanceof Regex.Empty){
+                return new Regex.Empty();
+            }
+
+            return new Regex.Grouping(reducedChild);
+        }
+        else {
+            throw new RuntimeException("Unknown regex type");
+        }
+    }
+
     private void createRToId(Regex r){
 
         if(r instanceof Regex.Letter letter){

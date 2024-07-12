@@ -16,6 +16,24 @@ public abstract class Regex {
         }
     }
 
+    // we use this to translate a regular expression containing epsilon (empty word) in one without
+    static class Opt extends Regex{
+        Regex r;
+
+        public Opt(Regex r){
+            this.r = r;
+        }
+
+        @Override
+        boolean isSemanticallyEqual(Regex other) {
+            return (other instanceof Opt opt) && (r.isSemanticallyEqual(opt.r));
+        }
+
+        public String toString(){
+            return String.format("%s?", r);
+        }
+    }
+
     static class Cat extends Regex{
         Regex left;
         Regex right;

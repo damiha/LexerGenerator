@@ -56,10 +56,21 @@ public class RegexParser {
     }
 
     public Regex star(){
-        Regex r = primary();
+        Regex r = opt();
 
         if(match('*')){
             return new Regex.Star(r);
+        }
+
+        return r;
+    }
+
+    // ? binds stronger than * because a?* = (a | eps)*
+    public Regex opt(){
+        Regex r = primary();
+
+        if(match('?')){
+            return new Regex.Opt(r);
         }
 
         return r;

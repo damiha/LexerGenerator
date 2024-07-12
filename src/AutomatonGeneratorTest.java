@@ -93,6 +93,25 @@ public class AutomatonGeneratorTest {
         assertFalse(nfa.isAccepted("baba"));
     }
 
+    @Test
+    public void testEpsilonReduction(){
+        RegexParser regexParser = new RegexParser();
+
+        AutomatonGenerator generator = new AutomatonGenerator();
+
+        Regex reduced1 = generator.getEpislonReducedRegex(regexParser.parse("a | ε"));
+        assertEquals("a?", reduced1.toString());
+
+        Regex reduced2 = generator.getEpislonReducedRegex(regexParser.parse("a | εεεb | εc"));
+        assertEquals("a | b | c", reduced2.toString());
+
+        Regex reduced3 = generator.getEpislonReducedRegex(regexParser.parse("ε"));
+        assertEquals("ε", reduced3.toString());
+
+        Regex reduced4 = generator.getEpislonReducedRegex(regexParser.parse("ε | a? | ε"));
+        assertEquals("a?", reduced4.toString());
+    }
+
     private void printAllNext(AutomatonGenerator g, Regex r, int level){
 
         String indent = "\t".repeat(level);
