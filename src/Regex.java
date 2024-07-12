@@ -10,6 +10,11 @@ public class Regex {
         public boolean equals(Object o){
             return (o instanceof Empty);
         }
+
+        @Override
+        public int hashCode(){
+            return 3;
+        }
     }
 
     static class Cat extends Regex{
@@ -29,6 +34,11 @@ public class Regex {
         public boolean equals(Object o){
             return (o instanceof Cat otherCat) && (left.equals(otherCat.left) && right.equals(otherCat.right));
         }
+
+        @Override
+        public int hashCode(){
+            return 31 * left.hashCode() + right.hashCode();
+        }
     }
 
     static class Star extends Regex{
@@ -45,6 +55,11 @@ public class Regex {
         @Override
         public boolean equals(Object o){
             return (o instanceof Star otherStar) && r.equals(otherStar.r);
+        }
+
+        @Override
+        public int hashCode(){
+            return 31 * r.hashCode();
         }
     }
 
@@ -64,6 +79,11 @@ public class Regex {
         public boolean equals(Object o){
             return (o instanceof Letter otherLetter) && c == otherLetter.c;
         }
+
+        @Override
+        public int hashCode(){
+            return c;
+        }
     }
 
     static class Grouping extends Regex{
@@ -80,6 +100,11 @@ public class Regex {
         @Override
         public boolean equals(Object o){
             return (o instanceof Grouping otherGrouping) && r.equals(otherGrouping.r);
+        }
+
+        @Override
+        public int hashCode(){
+            return 31 * r.hashCode();
         }
     }
 
@@ -100,6 +125,11 @@ public class Regex {
         @Override
         public boolean equals(Object o){
             return (o instanceof Or otherOr) && (left.equals(otherOr.left) && right.equals(otherOr.right));
+        }
+
+        @Override
+        public int hashCode(){
+            return 31 * left.hashCode() + right.hashCode();
         }
     }
 }
