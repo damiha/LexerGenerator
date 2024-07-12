@@ -24,10 +24,20 @@ public class AutomatonGeneratorTest {
 
         Regex aOrBStar = new Regex.Star(new Regex.Grouping(aOrb));
 
-        assertFalse(generator.isEmpty(a));
-        assertFalse(generator.isEmpty(b));
-        assertFalse(generator.isEmpty(aOrb));
-        assertTrue(generator.isEmpty(aOrBStar));
+        List<Regex> regexInTree = Utils.flatten(r);
+
+        // result for the root node?
         assertFalse(generator.isEmpty(r));
+
+        for(Regex regex : regexInTree){
+
+            if(regex.isSemanticallyEqual(a) || regex.isSemanticallyEqual(b) || regex.isSemanticallyEqual(aOrb)){
+                assertFalse(generator.isEmpty(regex));
+            }
+
+            else if(regex.isSemanticallyEqual(aOrBStar)) {
+                assertTrue(generator.isEmpty(regex));
+            }
+        }
     }
 }

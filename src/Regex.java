@@ -1,4 +1,9 @@
-public class Regex {
+public abstract class Regex {
+
+    // for comparing the AST,
+    // but we can't use that in general
+    // since different (a | b) in the syntax tree might have different first sets
+    abstract boolean isSemanticallyEqual(Regex other);
 
     static class Empty extends Regex{
 
@@ -6,14 +11,8 @@ public class Regex {
             return "ε";
         }
 
-        @Override
-        public boolean equals(Object o){
+        public boolean isSemanticallyEqual(Regex o){
             return (o instanceof Empty);
-        }
-
-        @Override
-        public int hashCode(){
-            return 3;
         }
     }
 
@@ -30,14 +29,9 @@ public class Regex {
             return String.format("%s%s", left.toString(), right.toString());
         }
 
-        @Override
-        public boolean equals(Object o){
-            return (o instanceof Cat otherCat) && (left.equals(otherCat.left) && right.equals(otherCat.right));
-        }
-
-        @Override
-        public int hashCode(){
-            return 31 * left.hashCode() + right.hashCode();
+        
+        public boolean isSemanticallyEqual(Regex o){
+            return (o instanceof Cat otherCat) && (left.isSemanticallyEqual(otherCat.left) && right.isSemanticallyEqual(otherCat.right));
         }
     }
 
@@ -53,13 +47,8 @@ public class Regex {
         }
 
         @Override
-        public boolean equals(Object o){
-            return (o instanceof Star otherStar) && r.equals(otherStar.r);
-        }
-
-        @Override
-        public int hashCode(){
-            return 31 * r.hashCode();
+        public boolean isSemanticallyEqual(Regex o){
+            return (o instanceof Star otherStar) && r.isSemanticallyEqual(otherStar.r);
         }
     }
 
@@ -76,13 +65,8 @@ public class Regex {
         }
 
         @Override
-        public boolean equals(Object o){
+        public boolean isSemanticallyEqual(Regex o){
             return (o instanceof Letter otherLetter) && c == otherLetter.c;
-        }
-
-        @Override
-        public int hashCode(){
-            return c;
         }
     }
 
@@ -98,13 +82,8 @@ public class Regex {
         }
 
         @Override
-        public boolean equals(Object o){
-            return (o instanceof Grouping otherGrouping) && r.equals(otherGrouping.r);
-        }
-
-        @Override
-        public int hashCode(){
-            return 31 * r.hashCode();
+        public boolean isSemanticallyEqual(Regex o){
+            return (o instanceof Grouping otherGrouping) && r.isSemanticallyEqual(otherGrouping.r);
         }
     }
 
@@ -123,13 +102,8 @@ public class Regex {
         }
 
         @Override
-        public boolean equals(Object o){
-            return (o instanceof Or otherOr) && (left.equals(otherOr.left) && right.equals(otherOr.right));
-        }
-
-        @Override
-        public int hashCode(){
-            return 31 * left.hashCode() + right.hashCode();
+        public boolean isSemanticallyEqual(Regex o){
+            return (o instanceof Or otherOr) && (left.isSemanticallyEqual(otherOr.left) && right.isSemanticallyEqual(otherOr.right));
         }
     }
 }

@@ -90,8 +90,17 @@ public class AutomatonGenerator {
         }
     }
 
+    // assumes that createEmpty has already been called
+    private void createFirst(Regex r){
+        // TODO
+    }
+
     public boolean isEmpty(Regex r){
         return empty.contains(rToId.get(r));
+    }
+
+    public Set<Integer> getFirst(Regex r){
+        return null;
     }
 
     public NFA generatorAutomaton(Regex r){
@@ -99,6 +108,8 @@ public class AutomatonGenerator {
         init(r);
 
         createEmpty(r);
+
+        createFirst(r);
 
         return null;
     }

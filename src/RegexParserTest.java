@@ -1,6 +1,7 @@
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class RegexParserTest {
 
@@ -26,7 +27,7 @@ public class RegexParserTest {
                 new Regex.Star(new Regex.Grouping(new Regex.Or(a, new Regex.Empty())))
         );
 
-        assertEquals(expected2, r2);
+        assertTrue(expected2.isSemanticallyEqual(r2));
     }
 
     @Test
@@ -48,6 +49,6 @@ public class RegexParserTest {
                 )
         );
 
-        assertEquals(expected, r);
+        assertTrue(expected.isSemanticallyEqual(r));
     }
 }
