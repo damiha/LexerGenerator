@@ -10,19 +10,29 @@ public class AutomatonGenerator {
     Map<Integer, Set<Integer>> next;
     Map<Integer, Set<Integer>> last;
 
+    Set<Integer> leaf;
+    Map<Integer, Character> leafToCharacter;
+
     Map<Regex, Integer> rToId;
 
     private void init(Regex r){
         empty = new HashSet<>();
+        leaf = new HashSet<>();
         first = new HashMap<>();
         next = new HashMap<>();
         last = new HashMap<>();
 
         rToId = new HashMap<>();
+        leafToCharacter = new HashMap<>();
         createRToId(r);
     }
 
     private void createRToId(Regex r){
+
+        if(r instanceof Regex.Letter letter){
+            leaf.add(rToId.size());
+            leafToCharacter.put(rToId.size(), letter.c);
+        }
 
         rToId.put(r, rToId.size());
 
@@ -299,6 +309,10 @@ public class AutomatonGenerator {
         return next.get(rToId.get(r));
     }
 
+    public Set<Integer> getNext(int i){
+        return next.get(i);
+    }
+
     public Set<Integer> getLast(Regex r){
         return last.get(rToId.get(r));
     }
@@ -319,6 +333,45 @@ public class AutomatonGenerator {
 
         createLast(r);
 
-        return null;
+        // construction on slide 33 (lexer-b.pdf)
+        String startState = "*S";
+
+        Set<String> finalStates = new HashSet<>();
+
+        for(Integer stateId : getLast(r)){
+            finalStates.add(String.format("%d*", stateId));
+        }
+
+        // if r can be empty, make start state a final state
+        if(isEmpty(r)){
+            finalStates.add(startState);
+        }
+
+        Map<Pair<String, Character>, Set<String>> transitions = new HashMap<>();
+
+        for(Integer firstFromStart : getFirst(r)){
+            Pair<String, Character> p = new Pair<>("*S", leafToCharacter.get(firstFromStart));
+
+            Set<String> nextAfterP = transitions.getOrDefault(p, new HashSet<>());
+            nextAfterP.add(String.format("%d*", firstFromStart));
+
+            transitions.put(p, nextAfterP);
+        }
+
+        for(Integer i : leaf){
+
+            for(Integer afterI : getNext(i)){
+
+                // *i, a, *i' where a is in i'
+                Pair<String, Character> p = new Pair<>(String.format("%d*", i), leafToCharacter.get(afterI));
+
+                Set<String> nextAfterP = transitions.getOrDefault(p, new HashSet<>());
+                nextAfterP.add(String.format("%d*", afterI));
+
+                transitions.put(p, nextAfterP);
+            }
+        }
+
+        return new NFA(startState, finalStates, transitions);
     }
 }

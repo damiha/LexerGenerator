@@ -15,7 +15,7 @@ public class AutomatonGeneratorTest {
 
         AutomatonGenerator generator = new AutomatonGenerator();
 
-        generator.generatorAutomaton(r);
+        NFA nfa = generator.generatorAutomaton(r);
 
         Regex a = new Regex.Letter('a');
         Regex b = new Regex.Letter('b');
@@ -77,6 +77,20 @@ public class AutomatonGeneratorTest {
                 }
             }
         }
+
+        // test the behavior of the constructed NFA
+
+        // must end either with aa or ab, rest is arbitrary
+        //(a | b)*a(a | b)
+
+        assertTrue(nfa.isAccepted("aa"));
+        assertTrue(nfa.isAccepted("ab"));
+
+        assertTrue(nfa.isAccepted("aaaa"));
+        assertTrue(nfa.isAccepted("baab"));
+
+        assertFalse(nfa.isAccepted("aabb"));
+        assertFalse(nfa.isAccepted("baba"));
     }
 
     private void printAllNext(AutomatonGenerator g, Regex r, int level){
