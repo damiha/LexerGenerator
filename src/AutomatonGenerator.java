@@ -119,6 +119,9 @@ public class AutomatonGenerator {
         else if(r instanceof Regex.Grouping grouping){
             createRToId(grouping.r);
         }
+        else if(r instanceof Regex.Opt opt){
+            createRToId(opt.r);
+        }
         else if(r instanceof Regex.Star star){
             createRToId(star.r);
         }
@@ -128,6 +131,9 @@ public class AutomatonGenerator {
     private void createEmpty(Regex r){
 
         if(r instanceof Regex.Empty){
+           throw new RuntimeException("Should not contain epsilon anymore.");
+        }
+        else if(r instanceof Regex.Opt){
             empty.add(rToId.get(r));
         }
         else if(r instanceof Regex.Letter){
@@ -175,9 +181,7 @@ public class AutomatonGenerator {
     private void createFirst(Regex r){
 
         if(r instanceof Regex.Empty){
-
-            // TODO: what to do here
-            throw new RuntimeException("Not implemented yet.");
+            throw new RuntimeException("Should not contain epsilon anymore.");
         }
         else if(r instanceof Regex.Letter){
 
@@ -220,6 +224,15 @@ public class AutomatonGenerator {
 
             first.put(rToId.get(r), firstForR);
         }
+        else if(r instanceof Regex.Opt opt){
+
+            createFirst(opt.r);
+
+            // pass the first set to the parent
+            Set<Integer> firstForR = new HashSet<>(getFirst(opt.r));
+
+            first.put(rToId.get(r), firstForR);
+        }
         else if(r instanceof Regex.Grouping grouping){
             createFirst(grouping.r);
 
@@ -235,9 +248,7 @@ public class AutomatonGenerator {
 
     private void createLast(Regex r){
         if(r instanceof Regex.Empty){
-
-            // TODO: what to do here
-            throw new RuntimeException("Not implemented yet.");
+            throw new RuntimeException("Should not contain epsilon anymore.");
         }
         else if(r instanceof Regex.Letter){
 
@@ -280,6 +291,15 @@ public class AutomatonGenerator {
 
             last.put(rToId.get(r), lastForR);
         }
+        else if(r instanceof Regex.Opt opt){
+
+            createLast(opt.r);
+
+            // pass the first set to the parent
+            Set<Integer> lastForR = new HashSet<>(getLast(opt.r));
+
+            last.put(rToId.get(r), lastForR);
+        }
         else if(r instanceof Regex.Grouping grouping){
             createLast(grouping.r);
 
@@ -300,9 +320,7 @@ public class AutomatonGenerator {
     // PRE order traversal
     private void createNext(Regex r){
         if(r instanceof Regex.Empty){
-
-            // TODO: what to do here
-            throw new RuntimeException("Not implemented yet.");
+            throw new RuntimeException("Should not contain epsilon anymore.");
         }
         else if(r instanceof Regex.Letter){
             // parent has to set this
@@ -354,6 +372,15 @@ public class AutomatonGenerator {
 
             createNext(star.r);
         }
+        else if(r instanceof Regex.Opt opt){
+
+            Set<Integer> nextForR = new HashSet<>(getNext(r));
+
+            // child set so continue
+            next.put(rToId.get(opt.r), nextForR);
+
+            createNext(opt.r);
+        }
         else if(r instanceof Regex.Grouping grouping){
 
             Set<Integer> nextForR = new HashSet<>(getNext(r));
@@ -389,6 +416,21 @@ public class AutomatonGenerator {
     }
 
     public NFA generatorAutomaton(Regex r){
+
+        // a | eps -> a?
+        // the slides only have generation rules for ?
+        r = getEpislonReducedRegex(r);
+
+        if(r instanceof Regex.Empty){
+            // special case, the whole language is just the empty word
+            // don't know if this is handled correctly by the Berry-Sethi construction
+            String q0 = "q0";
+
+            // only when no characters are read in (the empty word)
+            // last state set is q0 so contained in final states
+            // gets accepted
+            return new NFA(q0, Set.of(q0), new HashMap<>());
+        }
 
         init(r);
 
