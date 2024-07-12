@@ -17,6 +17,7 @@ RegexEngine regexEngine = new RegexEngine("a | b*");
 
 System.out.println(regexEngine.isAccepted("bbbbbbb"));
 ```
+NOTE: the + operator is not supported. Did not want to implement all the [syntactic sugar](https://en.wikipedia.org/wiki/Syntactic_sugar) that regex offers. For ```a+```, just use ```aa*```
 
 ### How it works
 
